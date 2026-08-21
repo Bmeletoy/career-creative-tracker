@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.bmeletoy.tracker.exception.ApplicationDetailsNotFoundException;
+import com.github.bmeletoy.tracker.exception.DuplicateApplicationDetailsException;
+import com.github.bmeletoy.tracker.exception.ProjectNotFoundException;
+
 @RestController
 @RequestMapping("/projects/{projectId}/application-details")
 public class ApplicationDetailsController {
@@ -30,7 +34,7 @@ public class ApplicationDetailsController {
         if(result.isPresent()){
            return ResponseEntity.ok(result.get());
         }
-        return ResponseEntity.notFound().build();
+        throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
     }
 
     @PostMapping 
@@ -43,7 +47,12 @@ public class ApplicationDetailsController {
             URI location = URI.create("/projects/" + ans.getId() + "/application-details");
             return ResponseEntity.created(location).body(saved);
         }
-        return ResponseEntity.notFound().build();
+         if(result.isEmpty()){
+            throw new ProjectNotFoundException("Project Not Found: " + projectId);
+         } else {
+            throw new DuplicateApplicationDetailsException("Project: " + projectId + " already has an existing Application-Detail");
+         } 
+       
     }
 
     @PutMapping
@@ -58,7 +67,7 @@ public class ApplicationDetailsController {
             ans = applicationDetailsRepository.save(ans);
             return ResponseEntity.ok(ans);
         }
-        return ResponseEntity.notFound().build();
+        throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
     }
 
     @DeleteMapping
@@ -69,6 +78,6 @@ public class ApplicationDetailsController {
             applicationDetailsRepository.delete(ans);
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.notFound().build();
+        throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
     }
 }

@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.bmeletoy.tracker.exception.ProjectNotFoundException;
+import com.github.bmeletoy.tracker.exception.StageNotFoundException;
+
 @RestController
 @RequestMapping("/projects/{projectId}/stages")
 public class StageController {
@@ -33,7 +36,7 @@ public class StageController {
         if(result.isPresent() && result.get().getProject().getId().equals(projectId)) {
             return ResponseEntity.ok(result.get());
         }
-        return ResponseEntity.notFound().build();
+        throw new StageNotFoundException("Stage: " + stageId + " not found for project " + projectId);
     }
 
     @GetMapping
@@ -42,7 +45,7 @@ public class StageController {
         if(result.isPresent()){
             return ResponseEntity.ok(stageRepository.findByProjectId(projectId));
         }
-        return ResponseEntity.notFound().build();
+        throw new ProjectNotFoundException("Project Not Found: " + projectId);
         
     }
 
@@ -56,7 +59,7 @@ public class StageController {
             URI location = URI.create("/projects/" + ans.getId() + "/stages/" + saved.getId());
             return ResponseEntity.created(location).body(saved);
         }
-        return ResponseEntity.notFound().build();
+        throw new ProjectNotFoundException("Project Not Found: " + projectId);
     }
 
     @PutMapping("/{stageId}")
@@ -73,7 +76,7 @@ public class StageController {
             ans = stageRepository.save(ans);
             return ResponseEntity.ok(ans);
         }
-        return ResponseEntity.notFound().build();
+        throw new StageNotFoundException("Stage: " + stageId + " not found for project " + projectId);
     }
 
     @DeleteMapping("/{stageId}")
@@ -85,6 +88,6 @@ public class StageController {
             stageRepository.deleteById(stageId);
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.notFound().build();
+       throw new StageNotFoundException("Stage: " + stageId + " not found for project " + projectId);
     }
 }

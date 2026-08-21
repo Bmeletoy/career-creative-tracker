@@ -1,0 +1,9 @@
+package com.github.bmeletoy.tracker.exception;
+
+public class ProjectNotFoundException extends RuntimeException {
+
+    public ProjectNotFoundException(String message){
+        super(message);
+    }
+    
+}

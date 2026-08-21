@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.bmeletoy.tracker.exception.ProjectNotFoundException;
+
 @RestController
 public class ProjectController {
     private final ProjectRepository projectRepository;
@@ -32,10 +34,8 @@ public class ProjectController {
         if (result.isPresent()){
             Project ans = result.get();
             return ResponseEntity.ok(ans);
-        } else {
-            return ResponseEntity.notFound().build();
         }
-        
+        throw new ProjectNotFoundException("Project Not Found: " + id); 
     }
 
     @PostMapping("/projects")
@@ -61,9 +61,9 @@ public class ProjectController {
             Project saved = projectRepository.save(toUpdate);
 
             return ResponseEntity.ok(saved);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        } 
+        throw new ProjectNotFoundException("Project Not Found: " + id);
+        
     }
 
     @DeleteMapping("/projects/{id}")
@@ -74,7 +74,7 @@ public class ProjectController {
             projectRepository.delete(toDelete);
             return ResponseEntity.noContent().build();
         } 
-        return ResponseEntity.notFound().build();
+        throw new ProjectNotFoundException("Project Not Found: " + id);
     }
     
 }
