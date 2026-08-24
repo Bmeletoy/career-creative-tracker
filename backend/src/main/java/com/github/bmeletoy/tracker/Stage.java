@@ -21,6 +21,7 @@ public class Stage {
     private LocalDate completedAt;
     private String evidenceUrl;
     private String notes;
+    private boolean optional;
 
 
     public Long getId() {
@@ -70,6 +71,14 @@ public class Stage {
     }
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public void setOptional(boolean optional){
+        this.optional = optional;
+    }
+
+    public boolean isOptional(){
+        return optional;
     }
 
     
