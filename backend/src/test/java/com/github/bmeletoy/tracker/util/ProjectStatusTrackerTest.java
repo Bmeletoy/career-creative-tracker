@@ -118,7 +118,7 @@ public class ProjectStatusTrackerTest {
     }
 
     @Test
-    void testPastDueNotDueisOverdue(){
+    void testFutureDueNotDueisOverdue(){
         Project project = new Project();
         project.setDueDate(LocalDate.now().plusDays(5));
          Stage required = new Stage();
