@@ -1,5 +1,6 @@
 package com.github.bmeletoy.tracker;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import tools.jackson.databind.ObjectMapper;
+import static org.hamcrest.Matchers.containsString;
 
 
 @SpringBootTest
@@ -36,13 +39,17 @@ public class ProjectControllerTest {
     @MockitoBean
     private ProjectRepository projectRepository;
 
-    private Project project;
+    private Project project, project2;
 
     @BeforeEach
     void setUp() {
         project = new Project();
         project.setTitle("Acme job");
         project.setId(1L);
+
+        project2 = new Project();
+        project2.setTitle("fusionSpan");
+        project2.setId(2L);
     }
 
     @Test
@@ -54,6 +61,18 @@ public class ProjectControllerTest {
         mockMvc.perform(get("/projects/1"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.title").value("Acme job"));
+    }
+
+    @Test
+    void testGetAllProjects() throws Exception{
+        Mockito.when(projectRepository.findAll())
+        .thenReturn(List.of(project, project2));
+
+        mockMvc.perform(get("/projects"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andExpect(jsonPath("$[0].title").value("Acme job"))
+        .andExpect(jsonPath("$[1].title").value("fusionSpan"));
     }
 
     @Test
@@ -101,6 +120,22 @@ public class ProjectControllerTest {
         .andExpect(jsonPath("$.id").value(1));
     }
 
+    @Test
+    void testUpdateProjectNotFound() throws Exception{
+        Project toUpdate = new Project();
+        toUpdate.setTitle("Not Acme job");
+
+        String json = objectMapper.writeValueAsString(toUpdate);
+
+        Mockito.when(projectRepository.findById(3L))
+        .thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/projects/3")
+        .contentType(MediaType.APPLICATION_JSON).content(json))
+        .andExpect(status().isNotFound())
+        .andExpect(content().string(containsString("Project Not Found: 3")));
+    }
+
     @Test 
     void testDeleteProject() throws Exception{
         Mockito.when(projectRepository.findById(1L))
@@ -110,6 +145,16 @@ public class ProjectControllerTest {
         .andExpect(status().isNoContent());
 
         Mockito.verify(projectRepository).delete(project);
+    }
+
+    @Test
+    void testDeleteProjectNotFound() throws Exception{
+        Mockito.when(projectRepository.findById(3L))
+        .thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/projects/3"))
+        .andExpect(status().isNotFound())
+        .andExpect(content().string(containsString("Project Not Found: 3")));
     }
     
 }

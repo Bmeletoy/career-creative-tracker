@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import tools.jackson.databind.ObjectMapper;
+import static org.hamcrest.Matchers.containsString;
 
 
 @SpringBootTest
@@ -137,6 +139,22 @@ public class StageControllerTest {
     }
 
     @Test
+    void testCreateStageProjectNotFound() throws Exception{
+        Stage temp = new Stage();
+        temp.setName("Pleased to offer");
+
+        Mockito.when(projectRepository.findById(7L))
+        .thenReturn(Optional.empty());
+
+        String json = objectMapper.writeValueAsString(temp);
+
+       mockMvc.perform(post("/projects/7/stages")
+       .contentType(MediaType.APPLICATION_JSON)
+       .content(json)).andExpect(status().isNotFound())
+       .andExpect(content().string(containsString("Project Not Found: 7")));
+    }
+
+    @Test
     void testUpdateStage() throws Exception{
         Stage toUpdate = new Stage();
         toUpdate.setName("Graced");
@@ -187,5 +205,15 @@ public class StageControllerTest {
         .andExpect(status().isNoContent());
 
         Mockito.verify(stageRepository).deleteById(1L);
+    }
+
+    @Test
+    void testDeleteStageNotFound() throws Exception{
+        Mockito.when(stageRepository.findById(7L))
+        .thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/projects/1/stages/7"))
+        .andExpect(status().isNotFound())
+        .andExpect(content().string(containsString("Stage: 7 not found for project 1")));
     }
 }

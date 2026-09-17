@@ -257,6 +257,4 @@ public class ApplicationDetailsControllerTest {
         .andExpect(status().isNotFound())
         .andExpect(content().string(containsString("Application Details not found for project:  3")));
     }
-
-    
 }
