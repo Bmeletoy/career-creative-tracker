@@ -30,11 +30,15 @@ public class ApplicationDetailsController {
 
     @GetMapping
     public ResponseEntity<ApplicationDetails> getApplicationDetails(@PathVariable Long projectId){
+        Optional<Project> ans = projectRepository.findById(projectId);
         Optional<ApplicationDetails> result = applicationDetailsRepository.findByProjectId(projectId);
-        if(result.isPresent()){
+        if(result.isPresent() && ans.isPresent()){
            return ResponseEntity.ok(result.get());
+        } else if(ans.isEmpty()){
+           throw new ProjectNotFoundException("Project: " +  projectId + " not found");
+        } else { 
+              throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
         }
-        throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
     }
 
     @PostMapping 
@@ -58,7 +62,8 @@ public class ApplicationDetailsController {
     @PutMapping
     public ResponseEntity<ApplicationDetails> updateApplicationDetails(@PathVariable Long projectId, @RequestBody ApplicationDetails applicationDetails){
         Optional<ApplicationDetails> res = applicationDetailsRepository.findByProjectId(projectId);
-        if(res.isPresent()){
+        Optional<Project> proj = projectRepository.findById(projectId);
+        if(res.isPresent() && proj.isPresent()){
             ApplicationDetails ans = res.get();
             ans.setCompanyName(applicationDetails.getCompanyName());
             ans.setResumeVariant(applicationDetails.getResumeVariant());
@@ -67,17 +72,27 @@ public class ApplicationDetailsController {
             ans = applicationDetailsRepository.save(ans);
             return ResponseEntity.ok(ans);
         }
-        throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
+        if(proj.isEmpty()){
+           throw new ProjectNotFoundException("Project: " +  projectId + " not found");
+        } else { 
+              throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
+        }
+        
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteApplicationDetails(@PathVariable Long projectId){
         Optional<ApplicationDetails> res = applicationDetailsRepository.findByProjectId(projectId);
-        if(res.isPresent()){
+        Optional<Project> proj = projectRepository.findById(projectId);
+        if(res.isPresent() && proj.isPresent()){
             ApplicationDetails ans = res.get();
             applicationDetailsRepository.delete(ans);
             return ResponseEntity.noContent().build();
         }
-        throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
+        if(proj.isEmpty()){
+           throw new ProjectNotFoundException("Project: " +  projectId + " not found");
+        } else { 
+              throw new ApplicationDetailsNotFoundException("Application Details not found for project:  " + projectId);
+        }
     }
 }
