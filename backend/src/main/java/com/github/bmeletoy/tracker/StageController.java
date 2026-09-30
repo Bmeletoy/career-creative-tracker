@@ -73,6 +73,7 @@ public class StageController {
             ans.setNotes(stage.getNotes());
             ans.setStatus(stage.getStatus());
             ans.setOrderIndex(stage.getOrderIndex());
+            ans.setOptional(stage.isOptional());
             ans = stageRepository.save(ans);
             return ResponseEntity.ok(ans);
         }

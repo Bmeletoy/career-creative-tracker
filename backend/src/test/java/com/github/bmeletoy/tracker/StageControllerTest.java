@@ -119,6 +119,16 @@ public class StageControllerTest {
     }
 
     @Test
+    void testGetStagesNoProject() throws Exception{
+        Mockito.when(projectRepository.findById(8L))
+        .thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/projects/8/stages"))
+        .andExpect(status().isNotFound())
+        .andExpect(content().string(containsString("Project Not Found: 8")));
+    }
+
+    @Test
     void testCreateStage() throws Exception{
         Stage temp = new Stage();
         temp.setName("Pleased to offer");
