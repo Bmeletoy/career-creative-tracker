@@ -64,6 +64,7 @@ public class StageControllerTest {
         stage1.setName("Getting Started");
         stage1.setProject(project);
         stage1.setId(1L);
+        stage1.setOptional(false);
 
         stage2 = new Stage();
         stage2.setName("Middle");
@@ -168,6 +169,7 @@ public class StageControllerTest {
     void testUpdateStage() throws Exception{
         Stage toUpdate = new Stage();
         toUpdate.setName("Graced");
+        //toUpdate.setOptional(true);
 
         String json = objectMapper.writeValueAsString(toUpdate);
 
@@ -181,7 +183,11 @@ public class StageControllerTest {
         .content(json)).andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Graced"))
         .andExpect(jsonPath("$.id").value(1));
+       // .andExpect(jsonPath("$.optional").value(true));
+
     }
+
+
 
     @Test
     void testUpdateNoStage() throws Exception{
